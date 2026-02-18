@@ -1,91 +1,94 @@
 // Appointments.js
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import AppointmentCard from './components/AppointmentCard';
-import './components/AppointmentCard.css';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import AppointmentCard from "./components/AppointmentCard";
+import "./components/AppointmentCard.css";
 
-const API_URL = process.env.REACT_APP_API_URL; // <- use environment variable
+// Fallback if env variable not set
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 const Appointments = () => {
     const [appointments, setAppointments] = useState([]);
     const [newAppointment, setNewAppointment] = useState({
-        patientName: '',
-        doctorName: '',
-        date: ''
+        patientName: "",
+        doctorName: "",
+        date: "",
     });
     const [selectedAppointment, setSelectedAppointment] = useState(null);
     const [isEditMode, setIsEditMode] = useState(false);
 
-    // Fetch appointments from backend
+    // ✅ Fetch appointments
     useEffect(() => {
-        console.log('Fetching appointments from:', API_URL); // Debug log
-        axios
-            .get(`${API_URL}/appointments`)
-            .then(response => setAppointments(response.data))
-            .catch(error =>
-                console.error('Error fetching appointments:', error)
-            );
+        fetchAppointments();
     }, []);
 
-    // Add new appointment
-    const handleAddAppointment = (e) => {
+    const fetchAppointments = async () => {
+        try {
+            const res = await axios.get(`${API_URL}/appointments`);
+            setAppointments(res.data);
+        } catch (error) {
+            console.error("Error fetching appointments:", error.message);
+        }
+    };
+
+    // ✅ Add Appointment
+    const handleAddAppointment = async (e) => {
         e.preventDefault();
 
-        axios
-            .post(`${API_URL}/appointments/add`, newAppointment)
-            .then(response => {
-                setAppointments([...appointments, response.data]);
-                setNewAppointment({
-                    patientName: '',
-                    doctorName: '',
-                    date: ''
-                });
-            })
-            .catch(error =>
-                console.error('Error adding appointment:', error)
+        if (!newAppointment.patientName || !newAppointment.doctorName || !newAppointment.date) {
+            alert("Please fill all fields");
+            return;
+        }
+
+        try {
+            const res = await axios.post(
+                `${API_URL}/appointments`,
+                newAppointment
             );
+            setAppointments([...appointments, res.data]);
+            setNewAppointment({ patientName: "", doctorName: "", date: "" });
+        } catch (error) {
+            console.error("Error adding appointment:", error.message);
+        }
     };
 
-    // Update existing appointment
-    const handleUpdateAppointment = (id, e) => {
+    // ✅ Update Appointment
+    const handleUpdateAppointment = async (e) => {
         e.preventDefault();
 
-        axios
-            .post(`${API_URL}/appointments/update/${id}`, selectedAppointment)
-            .then(() => {
-                const updatedApp = { ...selectedAppointment, _id: id };
-
-                setAppointments(
-                    appointments.map(appointment =>
-                        appointment._id === id ? updatedApp : appointment
-                    )
-                );
-
-                setSelectedAppointment(null);
-                setIsEditMode(false);
-            })
-            .catch(error =>
-                console.error('Error updating appointment:', error)
+        try {
+            await axios.put(
+                `${API_URL}/appointments/${selectedAppointment._id}`,
+                selectedAppointment
             );
+
+            setAppointments(
+                appointments.map((appointment) =>
+                    appointment._id === selectedAppointment._id
+                        ? selectedAppointment
+                        : appointment
+                )
+            );
+
+            setSelectedAppointment(null);
+            setIsEditMode(false);
+        } catch (error) {
+            console.error("Error updating appointment:", error.message);
+        }
     };
 
-    // Delete appointment
-    const handleDeleteAppointment = (id) => {
-        axios
-            .delete(`${API_URL}/appointments/delete/${id}`)
-            .then(() => {
-                setAppointments(
-                    appointments.filter(
-                        appointment => appointment._id !== id
-                    )
-                );
-            })
-            .catch(error =>
-                console.error('Error deleting appointment:', error)
+    // ✅ Delete Appointment
+    const handleDeleteAppointment = async (id) => {
+        try {
+            await axios.delete(`${API_URL}/appointments/${id}`);
+            setAppointments(
+                appointments.filter((appointment) => appointment._id !== id)
             );
+        } catch (error) {
+            console.error("Error deleting appointment:", error.message);
+        }
     };
 
-    // Edit appointment
     const handleEditAppointment = (appointment) => {
         setSelectedAppointment(appointment);
         setIsEditMode(true);
@@ -95,17 +98,11 @@ const Appointments = () => {
         <div className="flex-row" style={{ width: "100%" }}>
             <div className="flex-column">
                 <div className="add-form">
-                    <h4>
-                        {isEditMode ? 'Edit Appointment' : 'Add New Appointment'}
-                    </h4>
+                    <h4>{isEditMode ? "Edit Appointment" : "Add New Appointment"}</h4>
 
                     <form
                         className="appointment-form"
-                        onSubmit={
-                            isEditMode
-                                ? (e) => handleUpdateAppointment(selectedAppointment._id, e)
-                                : handleAddAppointment
-                        }
+                        onSubmit={isEditMode ? handleUpdateAppointment : handleAddAppointment}
                     >
                         <label>Patient Name:</label>
                         <input
@@ -119,11 +116,11 @@ const Appointments = () => {
                                 isEditMode
                                     ? setSelectedAppointment({
                                         ...selectedAppointment,
-                                        patientName: e.target.value
+                                        patientName: e.target.value,
                                     })
                                     : setNewAppointment({
                                         ...newAppointment,
-                                        patientName: e.target.value
+                                        patientName: e.target.value,
                                     })
                             }
                         />
@@ -140,11 +137,11 @@ const Appointments = () => {
                                 isEditMode
                                     ? setSelectedAppointment({
                                         ...selectedAppointment,
-                                        doctorName: e.target.value
+                                        doctorName: e.target.value,
                                     })
                                     : setNewAppointment({
                                         ...newAppointment,
-                                        doctorName: e.target.value
+                                        doctorName: e.target.value,
                                     })
                             }
                         />
@@ -154,24 +151,24 @@ const Appointments = () => {
                             type="date"
                             value={
                                 isEditMode
-                                    ? selectedAppointment?.date
+                                    ? selectedAppointment?.date?.substring(0, 10)
                                     : newAppointment.date
                             }
                             onChange={(e) =>
                                 isEditMode
                                     ? setSelectedAppointment({
                                         ...selectedAppointment,
-                                        date: e.target.value
+                                        date: e.target.value,
                                     })
                                     : setNewAppointment({
                                         ...newAppointment,
-                                        date: e.target.value
+                                        date: e.target.value,
                                     })
                             }
                         />
 
                         <button type="submit">
-                            {isEditMode ? 'Update Appointment' : 'Add Appointment'}
+                            {isEditMode ? "Update Appointment" : "Add Appointment"}
                         </button>
                     </form>
                 </div>
@@ -181,7 +178,7 @@ const Appointments = () => {
                 <h3>Appointments ({appointments.length})</h3>
 
                 <div className="appointment-list">
-                    {appointments.map(appointment => (
+                    {appointments.map((appointment) => (
                         <AppointmentCard
                             key={appointment._id}
                             appointment={appointment}
