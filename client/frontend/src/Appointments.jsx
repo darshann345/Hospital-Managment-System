@@ -5,7 +5,7 @@ import AppointmentCard from "./components/AppointmentCard";
 import "./components/AppointmentCard.css";
 
 // Fallback if env variable not set
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+const API_URL = process.env.REACT_APP_API_URL;
 
 const Appointments = () => {
     const [appointments, setAppointments] = useState([]);
