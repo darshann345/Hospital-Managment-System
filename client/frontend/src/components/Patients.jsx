@@ -5,6 +5,9 @@ import axios from 'axios';
 import './Patients.css';
 import PatientCard from './PatientCard';
 
+// Use environment variable for backend URL
+const API_URL = process.env.REACT_APP_API_URL;
+
 const Patients = () => {
     const [patients, setPatients] = useState([]);
     const [newPatient, setNewPatient] = useState({
@@ -15,20 +18,22 @@ const Patients = () => {
     const [selectedPatient, setSelectedPatient] = useState(null);
     const [isEditMode, setIsEditMode] = useState(false);
 
+    // Fetch patients from backend
     useEffect(() => {
         axios
-            .get('http://localhost:5000/patients')
+            .get(`${API_URL}/patients`)
             .then(response => setPatients(response.data))
             .catch(error =>
                 console.error('Error fetching patients:', error)
             );
     }, []);
 
+    // Add new patient
     const handleAddPatient = (e) => {
         e.preventDefault();
 
         axios
-            .post('http://localhost:5000/patients/add', newPatient)
+            .post(`${API_URL}/patients/add`, newPatient)
             .then(response => {
                 setPatients([...patients, response.data]);
                 setNewPatient({ name: '', age: '', gender: '' });
@@ -38,11 +43,12 @@ const Patients = () => {
             );
     };
 
+    // Update patient
     const handleUpdatePatient = (id, e) => {
         e.preventDefault();
 
         axios
-            .post(`http://localhost:5000/patients/update/${id}`, selectedPatient)
+            .post(`${API_URL}/patients/update/${id}`, selectedPatient)
             .then(() => {
                 const updatedPat = { ...selectedPatient, _id: id };
 
@@ -60,9 +66,10 @@ const Patients = () => {
             );
     };
 
+    // Delete patient
     const handleDeletePatient = (id) => {
         axios
-            .delete(`http://localhost:5000/patients/delete/${id}`)
+            .delete(`${API_URL}/patients/delete/${id}`)
             .then(() => {
                 setSelectedPatient(null);
                 setPatients(
@@ -74,6 +81,7 @@ const Patients = () => {
             );
     };
 
+    // Edit patient
     const handleEditPatient = (patient) => {
         setSelectedPatient(patient);
         setIsEditMode(true);

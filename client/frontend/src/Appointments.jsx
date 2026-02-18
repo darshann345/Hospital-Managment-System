@@ -4,6 +4,8 @@ import axios from 'axios';
 import AppointmentCard from './components/AppointmentCard';
 import './components/AppointmentCard.css';
 
+const API_URL = process.env.REACT_APP_API_URL; // <- use environment variable
+
 const Appointments = () => {
     const [appointments, setAppointments] = useState([]);
     const [newAppointment, setNewAppointment] = useState({
@@ -14,20 +16,22 @@ const Appointments = () => {
     const [selectedAppointment, setSelectedAppointment] = useState(null);
     const [isEditMode, setIsEditMode] = useState(false);
 
+    // Fetch appointments from backend
     useEffect(() => {
         axios
-            .get('http://localhost:5000/appointments')
+            .get(`${API_URL}/appointments`)
             .then(response => setAppointments(response.data))
             .catch(error =>
                 console.error('Error fetching appointments:', error)
             );
     }, []);
 
+    // Add new appointment
     const handleAddAppointment = (e) => {
         e.preventDefault();
 
         axios
-            .post('http://localhost:5000/appointments/add', newAppointment)
+            .post(`${API_URL}/appointments/add`, newAppointment)
             .then(response => {
                 setAppointments([...appointments, response.data]);
                 setNewAppointment({
@@ -41,14 +45,12 @@ const Appointments = () => {
             );
     };
 
+    // Update existing appointment
     const handleUpdateAppointment = (id, e) => {
         e.preventDefault();
 
         axios
-            .post(
-                `http://localhost:5000/appointments/update/${id}`,
-                selectedAppointment
-            )
+            .post(`${API_URL}/appointments/update/${id}`, selectedAppointment)
             .then(() => {
                 const updatedApp = { ...selectedAppointment, _id: id };
 
@@ -66,9 +68,10 @@ const Appointments = () => {
             );
     };
 
+    // Delete appointment
     const handleDeleteAppointment = (id) => {
         axios
-            .delete(`http://localhost:5000/appointments/delete/${id}`)
+            .delete(`${API_URL}/appointments/delete/${id}`)
             .then(() => {
                 setAppointments(
                     appointments.filter(
@@ -81,6 +84,7 @@ const Appointments = () => {
             );
     };
 
+    // Edit appointment
     const handleEditAppointment = (appointment) => {
         setSelectedAppointment(appointment);
         setIsEditMode(true);

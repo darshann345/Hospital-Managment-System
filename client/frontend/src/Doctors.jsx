@@ -4,6 +4,9 @@ import axios from 'axios';
 import DoctorCard from './components/DoctorCard';
 import './components/Doctors.css';
 
+// Use environment variable for backend URL
+const API_URL = process.env.REACT_APP_API_URL;
+
 const Doctors = () => {
   const [doctors, setDoctors] = useState([]);
   const [newDoctor, setNewDoctor] = useState({
@@ -13,20 +16,22 @@ const Doctors = () => {
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
 
+  // Fetch doctors from backend
   useEffect(() => {
     axios
-      .get('http://localhost:5000/doctors')
+      .get(`${API_URL}/doctors`)
       .then(response => setDoctors(response.data))
       .catch(error =>
         console.error('Error fetching doctors:', error)
       );
   }, []);
 
+  // Add new doctor
   const handleAddDoctor = (e) => {
     e.preventDefault();
 
     axios
-      .post('http://localhost:5000/doctors/add', newDoctor)
+      .post(`${API_URL}/doctors/add`, newDoctor)
       .then(response => {
         setDoctors([...doctors, response.data]);
         setNewDoctor({
@@ -39,14 +44,12 @@ const Doctors = () => {
       );
   };
 
+  // Update existing doctor
   const handleUpdateDoctor = (id, e) => {
     e.preventDefault();
 
     axios
-      .post(
-        `http://localhost:5000/doctors/update/${id}`,
-        selectedDoctor
-      )
+      .post(`${API_URL}/doctors/update/${id}`, selectedDoctor)
       .then(() => {
         const updatedDoc = { ...selectedDoctor, _id: id };
 
@@ -64,9 +67,10 @@ const Doctors = () => {
       );
   };
 
+  // Delete doctor
   const handleDeleteDoctor = (id) => {
     axios
-      .delete(`http://localhost:5000/doctors/delete/${id}`)
+      .delete(`${API_URL}/doctors/delete/${id}`)
       .then(() => {
         setDoctors(
           doctors.filter(doctor => doctor._id !== id)
@@ -77,6 +81,7 @@ const Doctors = () => {
       );
   };
 
+  // Edit doctor
   const handleEditDoctor = (doctor) => {
     setSelectedDoctor(doctor);
     setIsEditMode(true);
