@@ -18,6 +18,7 @@ const Appointments = () => {
 
     // Fetch appointments from backend
     useEffect(() => {
+        console.log('Fetching appointments from:', API_URL); // Debug log
         axios
             .get(`${API_URL}/appointments`)
             .then(response => setAppointments(response.data))
