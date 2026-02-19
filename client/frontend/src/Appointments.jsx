@@ -35,7 +35,7 @@ const Appointments = () => {
     // ✅ Add Appointment
     const handleAddAppointment = async (e) => {
         e.preventDefault();
-
+        console.log("Api is hitting")
         if (!newAppointment.patientName || !newAppointment.doctorName || !newAppointment.date) {
             alert("Please fill all fields");
             return;
