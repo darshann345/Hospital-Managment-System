@@ -25,7 +25,7 @@ const Appointments = () => {
 
     const fetchAppointments = async () => {
         try {
-            const res = await axios.get(`${API_URL}/appointments/add`);
+            const res = await axios.get(`${API_URL}/appointments`);
             setAppointments(res.data);
         } catch (error) {
             console.error("Error fetching appointments:", error.message);
@@ -43,7 +43,7 @@ const Appointments = () => {
 
         try {
             const res = await axios.post(
-                `${API_URL}/appointments`,
+                `${API_URL}/appointments/add`,
                 newAppointment
             );
             setAppointments([...appointments, res.data]);
