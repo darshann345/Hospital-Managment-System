@@ -25,7 +25,7 @@ const Appointments = () => {
 
     const fetchAppointments = async () => {
         try {
-            const res = await axios.get(`${API_URL}/appointments`);
+            const res = await axios.get(`${API_URL}/appointments/add`);
             setAppointments(res.data);
         } catch (error) {
             console.error("Error fetching appointments:", error.message);
