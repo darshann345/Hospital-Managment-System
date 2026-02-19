@@ -21,6 +21,8 @@ const Appointments = () => {
     // ✅ Fetch appointments
     useEffect(() => {
         fetchAppointments();
+        console.log("API_URL:", import.meta.env.VITE_API_URL);
+
     }, []);
 
     const fetchAppointments = async () => {
