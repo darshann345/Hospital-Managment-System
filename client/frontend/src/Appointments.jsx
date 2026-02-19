@@ -43,7 +43,7 @@ const Appointments = () => {
 
         try {
             const res = await axios.post(
-                `${API_URL}/appointments/add`,
+                `${API_URL}/appointments`,
                 newAppointment
             );
             setAppointments([...appointments, res.data]);
