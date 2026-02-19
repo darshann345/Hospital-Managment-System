@@ -5,7 +5,9 @@ import DoctorCard from './components/DoctorCard';
 import './components/Doctors.css';
 
 // Use environment variable for backend URL
-const API_URL = process.env.REACT_APP_API_URL;
+// const API_URL = process.env.REACT_APP_API_URL;
+const API_URL = import.meta.env.VITE_API_URL;
+
 
 const Doctors = () => {
   const [doctors, setDoctors] = useState([]);
