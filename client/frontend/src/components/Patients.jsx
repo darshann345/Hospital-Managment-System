@@ -1,87 +1,55 @@
-// src/components/Patients.js
-
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import './Patients.css';
 import PatientCard from './PatientCard';
-
-// Use environment variable for backend URL
-const API_URL = import.meta.env.VITE_API_URL;
+import { getPatients, addPatient, updatePatient, deletePatient } from '../api';
 
 const Patients = () => {
     const [patients, setPatients] = useState([]);
-    const [newPatient, setNewPatient] = useState({
-        name: '',
-        age: '',
-        gender: ''
-    });
+    const [newPatient, setNewPatient] = useState({ name: '', age: '', gender: '' });
     const [selectedPatient, setSelectedPatient] = useState(null);
     const [isEditMode, setIsEditMode] = useState(false);
 
-    // Fetch patients from backend
+    // Fetch patients
+    const fetchPatients = () => {
+        getPatients()
+            .then(res => setPatients(res.data))
+            .catch(err => console.error('Error fetching patients:', err));
+    };
+
     useEffect(() => {
-        axios
-            .get(`${API_URL}/patients`)
-            .then(response => setPatients(response.data))
-            .catch(error =>
-                console.error('Error fetching patients:', error)
-            );
+        fetchPatients();
     }, []);
 
-    // Add new patient
+    // Add patient
     const handleAddPatient = (e) => {
         e.preventDefault();
-
-        axios
-            .post(`${API_URL}/patients/add`, newPatient)
-            .then(response => {
-                setPatients([...patients, response.data]);
+        addPatient(newPatient)
+            .then(res => {
+                setPatients([...patients, res.data]);
                 setNewPatient({ name: '', age: '', gender: '' });
             })
-            .catch(error =>
-                console.error('Error adding patient:', error)
-            );
+            .catch(err => console.error('Error adding patient:', err));
     };
 
     // Update patient
     const handleUpdatePatient = (id, e) => {
         e.preventDefault();
-
-        axios
-            .post(`${API_URL}/patients/update/${id}`, selectedPatient)
+        updatePatient(id, selectedPatient)
             .then(() => {
-                const updatedPat = { ...selectedPatient, _id: id };
-
-                setPatients(
-                    patients.map(patient =>
-                        patient._id === id ? updatedPat : patient
-                    )
-                );
-
+                setPatients(patients.map(p => p._id === id ? { ...selectedPatient, _id: id } : p));
                 setSelectedPatient(null);
                 setIsEditMode(false);
             })
-            .catch(error =>
-                console.error('Error updating patient:', error)
-            );
+            .catch(err => console.error('Error updating patient:', err));
     };
 
     // Delete patient
     const handleDeletePatient = (id) => {
-        axios
-            .delete(`${API_URL}/patients/delete/${id}`)
-            .then(() => {
-                setSelectedPatient(null);
-                setPatients(
-                    patients.filter(patient => patient._id !== id)
-                );
-            })
-            .catch(error =>
-                console.error('Error deleting patient:', error)
-            );
+        deletePatient(id)
+            .then(() => setPatients(patients.filter(p => p._id !== id)))
+            .catch(err => console.error('Error deleting patient:', err));
     };
 
-    // Edit patient
     const handleEditPatient = (patient) => {
         setSelectedPatient(patient);
         setIsEditMode(true);
@@ -91,14 +59,7 @@ const Patients = () => {
         <div className="patient-main">
             <div className="form-sections">
                 <h4>{isEditMode ? 'Edit Patient' : 'Add New Patient'}</h4>
-
-                <form
-                    onSubmit={
-                        isEditMode
-                            ? (e) => handleUpdatePatient(selectedPatient._id, e)
-                            : handleAddPatient
-                    }
-                >
+                <form onSubmit={isEditMode ? (e) => handleUpdatePatient(selectedPatient._id, e) : handleAddPatient}>
                     <label>Name:</label>
                     <input
                         type="text"
@@ -109,7 +70,6 @@ const Patients = () => {
                                 : setNewPatient({ ...newPatient, name: e.target.value })
                         }
                     />
-
                     <label>Age:</label>
                     <input
                         type="text"
@@ -120,7 +80,6 @@ const Patients = () => {
                                 : setNewPatient({ ...newPatient, age: e.target.value })
                         }
                     />
-
                     <label>Gender:</label>
                     <input
                         type="text"
@@ -131,16 +90,12 @@ const Patients = () => {
                                 : setNewPatient({ ...newPatient, gender: e.target.value })
                         }
                     />
-
-                    <button type="submit">
-                        {isEditMode ? 'Update Patient' : 'Add Patient'}
-                    </button>
+                    <button type="submit">{isEditMode ? 'Update Patient' : 'Add Patient'}</button>
                 </form>
             </div>
 
             <div className="patients-section">
                 <h3 style={{ textAlign: "center" }}>Patients ({patients.length})</h3>
-
                 <div className="patient-list">
                     {patients.map(patient => (
                         <PatientCard
